@@ -1,4 +1,4 @@
-pbSource = LibV2RayPackedConfig.proto QRCode.proto
+pbSource = LibV2RayPackedConfig.proto QRCode.proto QRGenerateConf.proto
 
 #%.pb.go:%.proto
 #	protoc --go_out=. $^
