@@ -1,7 +1,11 @@
-pbTarget = LibV2RayPackedConfig.pb.go QRCode.pb.go
+pbSource = LibV2RayPackedConfig.proto QRCode.proto
 
-%.pb.go:%.proto
-	protoc --go_out=. $<
+#%.pb.go:%.proto
+#	protoc --go_out=. $^
 
-pb: $(pbTarget)
+pb: clean
+	protoc --go_out=. $(pbSource)
 	@echo "Done"
+
+clean:
+	-rm *.pb.go
