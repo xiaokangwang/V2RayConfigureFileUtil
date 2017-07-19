@@ -23,7 +23,7 @@ func (e *Encoder) EncodeToL2QR(payload []byte, conf QRGenConf) (*L2QRGen, error)
 		Gener.payload = make([][]byte, 1)
 		Gener.payload[0] = payload
 	} else {
-		Gener.PayloadSegment = size / int(conf.MaxQrSize)
+		Gener.PayloadSegment = (size / int(conf.MaxQrSize)) + 1
 		Gener.ReconstructSegment = int(math.Max((float64)(conf.ReconsConf.AtLeastReplacement), conf.ReconsConf.AtLeastMutiply*((float64)(Gener.PayloadSegment))))
 		Gener.TotalSegment = Gener.ReconstructSegment + Gener.PayloadSegment
 		Gener.templ.GroupCount = int32(Gener.TotalSegment)

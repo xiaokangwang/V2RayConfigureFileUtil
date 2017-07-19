@@ -42,7 +42,7 @@ func (qd *QRDecoder) OnNewDataScanned(data []byte) error {
 	//Check if payload Checksum is correct
 	PayloadCheckSum := sha3.Sum256(newdata.Payload)
 
-	if bytes.Equal(PayloadCheckSum[:], newdata.PayloadChecksum) {
+	if !bytes.Equal(PayloadCheckSum[:], newdata.PayloadChecksum) {
 		return errors.New("Bad Checksum")
 	}
 	//Assign payload if of differnet Message Number
@@ -65,7 +65,7 @@ func (qd *QRDecoder) memalloc(firstQR *LibV2RayQRCode) {
 }
 
 func (qd *QRDecoder) IsDecodeReady() bool {
-	return qd.PieceNeeded >= qd.PieceReceived
+	return qd.PieceNeeded <= qd.PieceReceived
 }
 
 func (qd *QRDecoder) Finish() ([]byte, error) {
