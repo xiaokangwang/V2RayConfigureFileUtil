@@ -10,6 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/sha3"
 )
+import "compress/gzip"
 
 func (e *Encoder) PackV2RayConfigureIntoPackedForm(FileName string) ([]byte, error) {
 
@@ -42,7 +43,28 @@ func (e *Encoder) PackV2RayConfigureIntoPackedFormB(FileName string, ft []byte) 
 	//Calc CheckSum
 	result := sha3.Sum256(ft)
 	PbRepre.CheckSum = result[:]
-	PbRepre.Payload = ft
+
+	PbRepre.GzipCompressed = true
+
+	var bytebuf bytes.Buffer
+	r, err := gzip.NewWriterLevel(&bytebuf, gzip.BestCompression)
+	if err != nil {
+		return nil, err
+	}
+	_, err = r.Write(ft)
+	if err != nil {
+		return nil, err
+	}
+	err = r.Flush()
+	if err != nil {
+		return nil, err
+	}
+	err = r.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	PbRepre.Payload = bytebuf.Bytes()
 
 	out, err := proto.Marshal(PbRepre)
 
@@ -58,7 +80,23 @@ func (e *Encoder) UnpackV2RayConfB(payload []byte) (string, []byte, error) {
 	if err != nil {
 		return "", nil, err
 	}
-	psum := sha3.Sum256(PbRepre.Payload)
+	var plctx []byte
+	//Decompress first
+	if PbRepre.GzipCompressed {
+		r := bytes.NewReader(PbRepre.Payload)
+		gr, err := gzip.NewReader(r)
+		if err != nil {
+			return "", nil, err
+		}
+		result, err := ioutil.ReadAll(gr)
+		if err != nil {
+			return "", nil, err
+		}
+		plctx = result
+	} else {
+		plctx = PbRepre.Payload
+	}
+	psum := sha3.Sum256(plctx)
 	if !bytes.Equal(PbRepre.CheckSum, psum[:]) {
 		return "", nil, errors.New("Checksum Mismatch")
 	}
@@ -71,5 +109,5 @@ func (e *Encoder) UnpackV2RayConfB(payload []byte) (string, []byte, error) {
 	case LibV2RayPackedConfig_FullJsonFile:
 		extension = ".json"
 	}
-	return extension, PbRepre.Payload, nil
+	return extension, plctx, nil
 }

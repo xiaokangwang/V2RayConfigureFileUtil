@@ -15,4 +15,5 @@ message LibV2RayPackedConfig {
   LibV2RayConfigureType ConfigType = 1;
   bytes CheckSum = 2; //Always use SHA3-256
   bytes Payload = 3;
+  bool GzipCompressed = 4;
 }

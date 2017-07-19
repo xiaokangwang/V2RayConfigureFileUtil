@@ -62,7 +62,7 @@ func qr(input, output string) {
 	}
 	url := ec.ByteToV2RayURL(payload)
 	var png []byte
-	png, err = qrcode.Encode(url, qrcode.Medium, 512)
+	png, err = qrcode.Encode(url, qrcode.Medium, 1024)
 	if err != nil {
 		panic(err)
 	}
