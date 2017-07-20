@@ -1,15 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"image/png"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	vlencoding "github.com/xiaokangwang/V2RayConfigureFileUtil/encoding"
 
-	qrcode "github.com/skip2/go-qrcode"
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/aztec"
+	qrenc "github.com/boombuler/barcode/qr"
 )
 
 func main() {
@@ -22,7 +26,10 @@ func main() {
 		qr(*input, *output)
 	case "seg":
 		seg(*input, *output)
+	case "AZ":
+		az(*input, *output)
 	case "rseg":
+		rseg(*input, *output)
 		//case "fpb":
 
 	}
@@ -31,7 +38,7 @@ func main() {
 func seg(input, output string) {
 	ec := &vlencoding.Encoder{}
 	qrconf := &vlencoding.QRGenConf{}
-	qrconf.ForceReconstruct = true
+	qrconf.ForceReconstruct = false
 	qrconf.MaxQrSize = 1024
 	qrconf.ReconsConf = &vlencoding.QRGenConf_ReconstructConf{AtLeastMutiply: 2.0, AtLeastReplacement: 4}
 	data, err := ec.PackV2RayConfigureIntoPackedForm(input)
@@ -61,12 +68,39 @@ func qr(input, output string) {
 		panic(err)
 	}
 	url := ec.ByteToV2RayURL(payload)
-	var png []byte
-	png, err = qrcode.Encode(url, qrcode.Medium, 1024)
+
+	qrCode, err := qrenc.Encode(url, qrenc.L, qrenc.Auto)
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile(output, png, 0600)
+	qrCode, err = barcode.Scale(qrCode, 1024, 1024)
+	if err != nil {
+		panic(err)
+	}
+	var pngbuf bytes.Buffer
+	png.Encode(&pngbuf, qrCode)
+	ioutil.WriteFile(output, pngbuf.Bytes(), 0600)
+}
+
+func az(input, output string) {
+	ec := &vlencoding.Encoder{}
+	payload, err := ioutil.ReadFile(input)
+	if err != nil {
+		panic(err)
+	}
+	url := ec.ByteToV2RayURL(payload)
+
+	qrCode, err := aztec.Encode([]byte(url), 3, 0)
+	if err != nil {
+		panic(err)
+	}
+	qrCode, err = barcode.Scale(qrCode, 1024, 1024)
+	if err != nil {
+		panic(err)
+	}
+	var pngbuf bytes.Buffer
+	png.Encode(&pngbuf, qrCode)
+	ioutil.WriteFile(output, pngbuf.Bytes(), 0600)
 }
 
 func rseg(input, output string) {

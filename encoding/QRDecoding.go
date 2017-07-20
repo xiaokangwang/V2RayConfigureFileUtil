@@ -8,6 +8,7 @@ import (
 	"github.com/klauspost/reedsolomon"
 	"golang.org/x/crypto/sha3"
 )
+import "github.com/davecgh/go-spew/spew"
 
 type QRDecoder struct {
 	notfirstQR    bool
@@ -24,6 +25,7 @@ func (e *Encoder) StartQRDecode() *QRDecoder {
 func (qd *QRDecoder) OnNewDataScanned(data []byte) error {
 	newdata := new(LibV2RayQRCode)
 	err := proto.Unmarshal(data, newdata)
+	spew.Dump(newdata)
 	if err != nil {
 		return err
 	}
