@@ -30,16 +30,11 @@ func (e *Encoder) PackV2RayConfigureIntoPackedForm(FileName string) ([]byte, err
 func (e *Encoder) PackV2RayConfigureIntoPackedFormB(FileName string, ft []byte) ([]byte, error) {
 	PbRepre := new(LibV2RayPackedConfig)
 	//Guess File Type
-	if strings.HasSuffix(FileName, ".LibV2RaySimpleProtoV1.pb") {
-		PbRepre.ConfigType = LibV2RayPackedConfig_LibV2RaySimpleProtoV1
-	} else if strings.HasSuffix(FileName, ".pb") {
-		PbRepre.ConfigType = LibV2RayPackedConfig_FullProto
-	} else if strings.HasSuffix(FileName, ".json") {
-		PbRepre.ConfigType = LibV2RayPackedConfig_FullJsonFile
-	} else {
-		return nil, errors.New("Cannot Guess Config Type")
+	var err error
+	PbRepre.ConfigType, err = GuessConfigType(FileName)
+	if err != nil {
+		return nil, err
 	}
-
 	//Calc CheckSum
 	result := sha3.Sum256(ft)
 	PbRepre.CheckSum = result[:]
@@ -110,4 +105,16 @@ func (e *Encoder) UnpackV2RayConfB(payload []byte) (string, []byte, error) {
 		extension = ".json"
 	}
 	return extension, plctx, nil
+}
+
+func GuessConfigType(FileName string) (LibV2RayPackedConfig_LibV2RayConfigureType, error) {
+	if strings.HasSuffix(FileName, ".LibV2RaySimpleProtoV1.pb") {
+		return LibV2RayPackedConfig_LibV2RaySimpleProtoV1, nil
+	} else if strings.HasSuffix(FileName, ".pb") {
+		return LibV2RayPackedConfig_FullProto, nil
+	} else if strings.HasSuffix(FileName, ".json") {
+		return LibV2RayPackedConfig_FullJsonFile, nil
+	} else {
+		return 0, errors.New("Cannot Guess Config Type")
+	}
 }
