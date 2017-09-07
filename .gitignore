@@ -15,3 +15,5 @@
 
 #Generated pb source
 *.pb.go
+
+*/bindata.go

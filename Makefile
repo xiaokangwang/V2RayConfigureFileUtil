@@ -37,3 +37,6 @@ genqr: clean seg
 
 clean:
 		-rm -R out seg
+
+ShippedBinary:
+	cd Convert; $(MAKE) shippedBinary

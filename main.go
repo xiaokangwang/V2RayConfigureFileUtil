@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"image/png"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/xiaokangwang/V2RayConfigureFileUtil/Convert"
 	vlencoding "github.com/xiaokangwang/V2RayConfigureFileUtil/encoding"
 
 	"github.com/boombuler/barcode"
@@ -31,6 +33,10 @@ func main() {
 	case "rseg":
 		rseg(*input, *output)
 		//case "fpb":
+	case "lv2json":
+		lv2json(*input, *output)
+	case "jsongrace":
+		jsongrace(*input, *output)
 
 	}
 }
@@ -136,4 +142,40 @@ func rseg(input, output string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func lv2json(input, output string) {
+	inputb, err := ioutil.ReadFile(input)
+	if err != nil {
+		panic(err)
+	}
+	bin, err := Convert.JsonConvert(inputb)
+	if err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile(output, bin, 0600)
+}
+
+func jsonprettyprint(b []byte) ([]byte, error) {
+	var out bytes.Buffer
+	err := json.Indent(&out, b, "", "  ")
+	return out.Bytes(), err
+}
+
+func jsonmini(b []byte) ([]byte, error) {
+	var out bytes.Buffer
+	err := json.Indent(&out, b, "", "")
+	return out.Bytes(), err
+}
+
+func jsongrace(input, output string) {
+	inputb, err := ioutil.ReadFile(input)
+	if err != nil {
+		panic(err)
+	}
+	bin, err := jsonprettyprint(inputb)
+	if err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile(output, bin, 0600)
 }
