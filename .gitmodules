@@ -1,0 +1,3 @@
+[submodule "vendor/v2ray.com/ext"]
+	path = vendor/v2ray.com/ext 
+  url = https://github.com/v2ray/ext.git
