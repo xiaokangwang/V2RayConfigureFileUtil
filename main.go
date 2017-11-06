@@ -1,5 +1,6 @@
 package main
 
+//go:generate make all
 import (
 	"bytes"
 	"encoding/json"

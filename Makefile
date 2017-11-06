@@ -40,3 +40,6 @@ clean:
 
 ShippedBinary:
 	cd Convert; $(MAKE) shippedBinary
+
+all: ShippedBinary pb
+	@echo OK!
