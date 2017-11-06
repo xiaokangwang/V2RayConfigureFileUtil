@@ -1,3 +1,0 @@
-[submodule "vendor/v2ray.com/ext"]
-	path = vendor/v2ray.com/ext
-	url = git@github.com:v2ray/ext.git
